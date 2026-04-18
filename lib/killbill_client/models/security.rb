@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class Security < Resource
-      KILLBILL_API_SECURITY_PREFIX = "#{KILLBILL_API_PREFIX}/security"
+      KILLBILL_API_SECURITY_PREFIX = "#{KILLBILL_API_PREFIX}/security".freeze
 
       class << self
         def find_permissions(options = {})

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe KillBillClient::Model do
@@ -17,9 +19,9 @@ describe KillBillClient::Model do
     KillBillClient.return_full_stacktraces = false
   end
 
-  it 'should manipulate accounts', :integration => true  do
+  it 'manipulates accounts', :integration do
     # In case the remote server has lots of data
-    search_limit = 100000
+    search_limit = 100_000
 
     external_key = SecureRandom.uuid.to_s
 
@@ -31,7 +33,7 @@ describe KillBillClient::Model do
     account.time_zone = 'UTC'
     account.address1 = '5, ruby road'
     account.address2 = 'Apt 4'
-    account.postal_code = 10293
+    account.postal_code = 10_293
     account.company = 'KillBill, Inc.'
     account.city = 'SnakeCase'
     account.state = 'Awesome'
@@ -194,12 +196,10 @@ describe KillBillClient::Model do
       sleep(1) if retries > 0
       account = KillBillClient::Model::Account.find_by_id account.account_id, true
       expect(account.account_balance).to eq(0)
-    rescue Exception => e
-      if (retries += 1) < 15
-        retry
-      else
-        raise e
-      end
+    rescue StandardError => e
+      raise e unless (retries += 1) < 15
+
+      retry
     end
 
     KillBillClient::Model::PaymentMethod.destroy(pm.payment_method_id, true, true, 'KillBill Spec test')
@@ -213,10 +213,10 @@ describe KillBillClient::Model do
     expect(timeline.account.external_key).to eq(external_key)
     expect(timeline.account.account_id).not_to be_nil
 
-    expect(timeline.invoices).to be_a_kind_of Array
+    expect(timeline.invoices).to be_a Array
     expect(timeline.invoices).not_to be_empty
-    expect(timeline.payments).to be_a_kind_of Array
-    expect(timeline.bundles).to be_a_kind_of Array
+    expect(timeline.payments).to be_a Array
+    expect(timeline.bundles).to be_a Array
 
     # Let's find the invoice by two methods
     invoice = timeline.invoices.first
@@ -305,7 +305,7 @@ describe KillBillClient::Model do
     new_credit = KillBillClient::Model::Credit.new
     new_credit.amount = 10.1
     new_credit.invoice_id = invoice_id
-    new_credit.start_date = "2013-09-30"
+    new_credit.start_date = '2013-09-30'
     new_credit.account_id = account.account_id
 
     expect { new_credit.create(true, 'KillBill Spec test') }.to raise_error(KillBillClient::API::BadRequest)
@@ -351,7 +351,7 @@ describe KillBillClient::Model do
     expect(export).to include(account.account_id)
   end
 
-  it 'should manipulate tag definitions' do
+  it 'manipulates tag definitions' do
     expect(KillBillClient::Model::TagDefinition.all.size).to be > 0
     expect(KillBillClient::Model::TagDefinition.find_by_name('TEST').is_control_tag).to be_truthy
 
@@ -370,7 +370,7 @@ describe KillBillClient::Model do
     expect(found_tag_definition.is_control_tag).to be_falsey
   end
 
-  it 'should manipulate tenants', :integration => true  do
+  it 'manipulates tenants', :integration do
     api_key = SecureRandom.uuid.to_s + rand(100).to_s
     api_secret = api_key
 
@@ -392,15 +392,15 @@ describe KillBillClient::Model do
     expect(tenant.api_key).to eq(api_key)
   end
 
-  it 'should manipulate the catalog', :integration => true do
-    plans = KillBillClient::Model::Catalog::available_base_plans
+  it 'manipulates the catalog', :integration do
+    plans = KillBillClient::Model::Catalog.available_base_plans
     expect(plans.size).to be > 0
     expect(plans[0].plan).not_to be_nil
   end
 
-  #it 'should retrieve users permissions' do
+  # it 'should retrieve users permissions' do
   #  # Tough to verify as it depends on the Kill Bill configuration
   #  puts KillBillClient::Model::Security.find_permissions
   #  puts KillBillClient::Model::Security.find_permissions(:username => 'admin', :password => 'password')
-  #end
+  # end
 end

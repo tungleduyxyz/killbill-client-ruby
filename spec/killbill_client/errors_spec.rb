@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe KillBillClient::API::ResponseError do
   describe '::error_for' do
     let(:request) { double('request') }
     let(:response) { double('response') }
+
     before do
       allow(response).to receive(:body)
       allow(response).to receive(:code)

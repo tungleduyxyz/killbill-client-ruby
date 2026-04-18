@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Copyright 2011-2013 Ning, Inc.
 #
@@ -23,7 +25,7 @@ module KillBillClient
 
     # @return [String]
     def to_s
-      defined? @message and @message or super
+      (defined? @message and @message) or super
     end
   end
 
@@ -34,34 +36,28 @@ module KillBillClient
   class << self
     # @return [String] A host.
     def url
-      defined? @url and @url or raise(
-          ConfigurationError, 'KillBillClient.url not configured'
+      (defined? @url and @url) or raise(
+        ConfigurationError, 'KillBillClient.url not configured'
       )
     end
 
-    attr_writer :url
+    attr_writer :url, :default_currency
 
-    attr_accessor :read_timeout
-    attr_accessor :connection_timeout
-    attr_accessor :disable_ssl_verification
-    attr_accessor :return_full_stacktraces
+    attr_accessor :read_timeout, :connection_timeout, :disable_ssl_verification, :return_full_stacktraces, :api_secret, :password
 
     # Tenant key/secret. Optional.
     attr_accessor :api_key
-    attr_accessor :api_secret
 
     # RBAC username/password. Optional.
     # These can also be configured on a per request basis
     attr_accessor :username
-    attr_accessor :password
 
     # @return [String, nil] A default currency.
     def default_currency
       return @default_currency if defined? @default_currency
+
       @default_currency = 'USD'
     end
-
-    attr_writer :default_currency
 
     # Assigns a logger to log requests/responses and more.
     #
@@ -84,12 +80,14 @@ module KillBillClient
     if RUBY_VERSION <= '1.9.0'
       def const_defined?(sym, inherit = false)
         raise ArgumentError, 'inherit must be false' if inherit
-        super sym
+
+        super(sym)
       end
 
       def const_get(sym, inherit = false)
         raise ArgumentError, 'inherit must be false' if inherit
-        super sym
+
+        super(sym)
       end
     end
   end
@@ -107,32 +105,38 @@ rescue LoadError, NoMethodError
   begin
     # See http://jira.codehaus.org/browse/JRUBY-6176
     module SecureRandom
-      def self.uuid
-        ary = self.random_bytes(16).unpack("NnnnnN")
-        ary[2] = (ary[2] & 0x0fff) | 0x4000
-        ary[3] = (ary[3] & 0x3fff) | 0x8000
-        "%08x-%04x-%04x-%04x-%04x%08x" % ary
-      end unless respond_to?(:uuid)
+      unless respond_to?(:uuid)
+        def self.uuid
+          ary = random_bytes(16).unpack('NnnnnN')
+          ary[2] = (ary[2] & 0x0fff) | 0x4000
+          ary[3] = (ary[3] & 0x3fff) | 0x8000
+          '%08x-%04x-%04x-%04x-%04x%08x' % ary
+        end
+      end
     end
   rescue TypeError
     class SecureRandom
-      def self.uuid
-        ary = self.random_bytes(16).unpack("NnnnnN")
-        ary[2] = (ary[2] & 0x0fff) | 0x4000
-        ary[3] = (ary[3] & 0x3fff) | 0x8000
-        "%08x-%04x-%04x-%04x-%04x%08x" % ary
-      end unless respond_to?(:uuid)
+      unless respond_to?(:uuid)
+        def self.uuid
+          ary = random_bytes(16).unpack('NnnnnN')
+          ary[2] = (ary[2] & 0x0fff) | 0x4000
+          ary[3] = (ary[3] & 0x3fff) | 0x8000
+          '%08x-%04x-%04x-%04x-%04x%08x' % ary
+        end
+      end
     end
   end
 end
 
 # URI::DEFAULT_PARSER is NOT compatible with ree 1.8.3
-module URI
-  module DEFAULT_PARSER
-    def self.escape(*args)
-      URI.escape(*args)
+unless defined? URI::DEFAULT_PARSER
+  module URI
+    module DEFAULT_PARSER
+      def self.escape(*)
+        URI.escape(*)
+      end
     end
   end
-end unless defined? URI::DEFAULT_PARSER
+end
 
 require 'rails/killbill_client' if defined? Rails::Railtie

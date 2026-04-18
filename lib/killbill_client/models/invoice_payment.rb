@@ -1,12 +1,13 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class InvoicePayment < InvoicePaymentAttributes
-
       include KillBillClient::Model::CustomFieldHelper
       include KillBillClient::Model::TagHelper
       include KillBillClient::Model::AuditLogWithHistoryHelper
 
-      KILLBILL_API_INVOICE_PAYMENTS_PREFIX = "#{KILLBILL_API_PREFIX}/invoicePayments"
+      KILLBILL_API_INVOICE_PAYMENTS_PREFIX = "#{KILLBILL_API_PREFIX}/invoicePayments".freeze
 
       has_many :transactions, KillBillClient::Model::Transaction
       has_many :payment_attempts, KillBillClient::Model::PaymentAttemptAttributes
@@ -21,8 +22,8 @@ module KillBillClient
         def find_by_id(payment_id, with_plugin_info = false, with_attempts = false, options = {})
           get "#{KILLBILL_API_INVOICE_PAYMENTS_PREFIX}/#{payment_id}",
               {
-                  :withAttempts => with_attempts,
-                  :withPluginInfo => with_plugin_info
+                withAttempts: with_attempts,
+                withPluginInfo: with_plugin_info
               },
               options
         end
@@ -37,9 +38,9 @@ module KillBillClient
                                  payload.to_json,
                                  {},
                                  {
-                                     :user    => user,
-                                     :reason  => reason,
-                                     :comment => comment,
+                                   user: user,
+                                   reason: reason,
+                                   comment: comment
                                  }.merge(options)
 
           invoice_payment.refresh(options)
@@ -55,9 +56,9 @@ module KillBillClient
                                  payload.to_json,
                                  {},
                                  {
-                                     :user    => user,
-                                     :reason  => reason,
-                                     :comment => comment,
+                                   user: user,
+                                   reason: reason,
+                                   comment: comment
                                  }.merge(options)
           invoice_payment.refresh(options)
         end
@@ -71,9 +72,9 @@ module KillBillClient
                                  payload.to_json,
                                  {},
                                  {
-                                     :user    => user,
-                                     :reason  => reason,
-                                     :comment => comment,
+                                   user: user,
+                                   reason: reason,
+                                   comment: comment
                                  }.merge(options)
           invoice_payment.refresh(options)
         end
@@ -86,9 +87,9 @@ module KillBillClient
               invoice_payment.to_json,
               {},
               {
-                  :user => user,
-                  :reason => reason,
-                  :comment => comment
+                user: user,
+                reason: reason,
+                comment: comment
               }.merge(options)
         end
       end
@@ -97,12 +98,12 @@ module KillBillClient
         created_invoice_payment = self.class.post "#{Invoice::KILLBILL_API_INVOICES_PREFIX}/#{target_invoice_id}/payments",
                                                   to_json,
                                                   {
-                                                      :externalPayment => external_payment
+                                                    externalPayment: external_payment
                                                   },
                                                   {
-                                                      :user    => user,
-                                                      :reason  => reason,
-                                                      :comment => comment,
+                                                    user: user,
+                                                    reason: reason,
+                                                    comment: comment
                                                   }.merge(options)
         created_invoice_payment.refresh(options)
       end
@@ -112,15 +113,15 @@ module KillBillClient
         self.class.post "#{Account::KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/invoicePayments",
                         {},
                         {
-                            :externalPayment => external_payment,
-                            :paymentAmount   => purchased_amount,
-                            :paymentMethodId => payment_method_id,
-                            :targetDate => target_date
+                          externalPayment: external_payment,
+                          paymentAmount: purchased_amount,
+                          paymentMethodId: payment_method_id,
+                          targetDate: target_date
                         },
                         {
-                            :user    => user,
-                            :reason  => reason,
-                            :comment => comment,
+                          user: user,
+                          reason: reason,
+                          comment: comment
                         }.merge(options)
       end
     end

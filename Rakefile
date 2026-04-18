@@ -1,4 +1,5 @@
 #!/usr/bin/env rake
+# frozen_string_literal: true
 
 # Install tasks to build and release the plugin
 require 'bundler/setup'
@@ -23,4 +24,4 @@ namespace :test do
 end
 
 # Run tests by default
-task :default => 'test:spec'
+task default: 'test:spec'

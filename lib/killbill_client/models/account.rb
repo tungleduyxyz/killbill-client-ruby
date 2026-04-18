@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class Account < AccountAttributes
-
-      KILLBILL_API_ACCOUNTS_PREFIX = "#{KILLBILL_API_PREFIX}/accounts"
+      KILLBILL_API_ACCOUNTS_PREFIX = "#{KILLBILL_API_PREFIX}/accounts".freeze
 
       include KillBillClient::Model::TagHelper
       include KillBillClient::Model::CustomFieldHelper
@@ -18,10 +19,10 @@ module KillBillClient
         def find_in_batches(offset = 0, limit = 100, with_balance = false, with_balance_and_cba = false, options = {})
           get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{Resource::KILLBILL_API_PAGINATION_PREFIX}",
               {
-                  :offset                   => offset,
-                  :limit                    => limit,
-                  :accountWithBalance       => with_balance,
-                  :accountWithBalanceAndCBA => with_balance_and_cba
+                offset: offset,
+                limit: limit,
+                accountWithBalance: with_balance,
+                accountWithBalanceAndCBA: with_balance_and_cba
               },
               options
         end
@@ -29,18 +30,18 @@ module KillBillClient
         def find_by_id(account_id, with_balance = false, with_balance_and_cba = false, options = {})
           get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}",
               {
-                  :accountWithBalance       => with_balance,
-                  :accountWithBalanceAndCBA => with_balance_and_cba
+                accountWithBalance: with_balance,
+                accountWithBalanceAndCBA: with_balance_and_cba
               },
               options
         end
 
         def find_by_external_key(external_key, with_balance = false, with_balance_and_cba = false, options = {})
-          get "#{KILLBILL_API_ACCOUNTS_PREFIX}",
+          get KILLBILL_API_ACCOUNTS_PREFIX.to_s,
               {
-                  :externalKey              => external_key,
-                  :accountWithBalance       => with_balance,
-                  :accountWithBalanceAndCBA => with_balance_and_cba
+                externalKey: external_key,
+                accountWithBalance: with_balance,
+                accountWithBalanceAndCBA: with_balance_and_cba
               },
               options
         end
@@ -48,20 +49,20 @@ module KillBillClient
         def find_in_batches_by_search_key(search_key, offset = 0, limit = 100, with_balance = false, with_balance_and_cba = false, options = {})
           get "#{KILLBILL_API_ACCOUNTS_PREFIX}/search/#{search_key}",
               {
-                  :offset                   => offset,
-                  :limit                    => limit,
-                  :accountWithBalance       => with_balance,
-                  :accountWithBalanceAndCBA => with_balance_and_cba
+                offset: offset,
+                limit: limit,
+                accountWithBalance: with_balance,
+                accountWithBalanceAndCBA: with_balance_and_cba
               },
               options
         end
 
-        def find_children(account_id, with_balance = false, with_balance_and_cba = false, audit='NONE', options = {})
+        def find_children(account_id, with_balance = false, with_balance_and_cba = false, audit = 'NONE', options = {})
           get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/children",
               {
-                :audit                    => audit,
-                :accountWithBalance       => with_balance,
-                :accountWithBalanceAndCBA => with_balance_and_cba
+                audit: audit,
+                accountWithBalance: with_balance,
+                accountWithBalanceAndCBA: with_balance_and_cba
               },
               options
         end
@@ -73,26 +74,37 @@ module KillBillClient
               AuditLog
         end
 
-        def paginated_bundles(account_id, offset = 0, limit = 100, audit = "NONE", options = {})
+        def paginated_bundles(account_id, offset = 0, limit = 100, audit = 'NONE', options = {})
           get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/bundles/pagination",
-                          {
-                            :offset => offset,
-                            :limit => limit,
-                            :audit => audit
-                          },
-                          options,
-                          Bundle
+              {
+                offset: offset,
+                limit: limit,
+                audit: audit
+              },
+              options,
+              Bundle
         end
 
-        def paginated_invoices(account_id, offset = 0, limit = 100, audit = "NONE", options = {})
+        def paginated_invoices(account_id, offset = 0, limit = 100, audit = 'NONE', options = {})
           get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/invoices/pagination",
-                   {
-                    :offset => offset,
-                    :limit => limit,
-                    :audit => audit
-                   },
-                   options,
-                   Invoice
+              {
+                offset: offset,
+                limit: limit,
+                audit: audit
+              },
+              options,
+              Invoice
+        end
+
+        def paginated_payments(account_id, offset = 0, limit = 100, audit = 'NONE', options = {})
+          get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/payments/pagination",
+              {
+                offset: offset,
+                limit: limit,
+                audit: audit
+              },
+              options,
+              Payment
         end
       end
 
@@ -101,15 +113,14 @@ module KillBillClient
                                           to_json,
                                           {},
                                           {
-                                              :user    => user,
-                                              :reason  => reason,
-                                              :comment => comment,
+                                            user: user,
+                                            reason: reason,
+                                            comment: comment
                                           }.merge(options)
         created_account.refresh(options)
       end
 
       def update(treat_null_as_reset = false, user = nil, reason = nil, comment = nil, options = {})
-
         params = {}
         params[:treatNullAsReset] = treat_null_as_reset
 
@@ -117,45 +128,40 @@ module KillBillClient
                        to_json,
                        params,
                        {
-                           :user    => user,
-                           :reason  => reason,
-                           :comment => comment,
+                         user: user,
+                         reason: reason,
+                         comment: comment
                        }.merge(options)
 
         self.class.find_by_id(account_id, nil, nil, options)
-
       end
 
-
-      def close(cancel_subscriptions, writeoff_unpaid_invoices,  item_adjust_unpaid_invoices, user = nil, reason = nil, comment = nil, options = {})
+      def close(cancel_subscriptions, writeoff_unpaid_invoices, item_adjust_unpaid_invoices, user = nil, reason = nil, comment = nil, options = {})
         created_account = self.class.delete "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}",
                                             {},
                                             {
-                                                :cancelAllSubscriptions => cancel_subscriptions,
-                                                :writeOffUnpaidInvoices => writeoff_unpaid_invoices,
-                                                :itemAdjustUnpaidInvoices => item_adjust_unpaid_invoices
+                                              cancelAllSubscriptions: cancel_subscriptions,
+                                              writeOffUnpaidInvoices: writeoff_unpaid_invoices,
+                                              itemAdjustUnpaidInvoices: item_adjust_unpaid_invoices
                                             },
                                             {
-                                                :user    => user,
-                                                :reason  => reason,
-                                                :comment => comment,
+                                              user: user,
+                                              reason: reason,
+                                              comment: comment
                                             }.merge(options)
         created_account.refresh(options)
       end
 
-
-
       def transfer_child_credit(user = nil, reason = nil, comment = nil, options = {})
         self.class.put "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/transferCredit",
-                        {},
-                        {},
-                        {
-                            :user    => user,
-                            :reason  => reason,
-                            :comment => comment,
-                        }.merge(options)
+                       {},
+                       {},
+                       {
+                         user: user,
+                         reason: reason,
+                         comment: comment
+                       }.merge(options)
       end
-
 
       def bundles(options = {})
         self.class.get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/bundles",
@@ -167,17 +173,17 @@ module KillBillClient
       def invoices(options = {})
         params_hash = options.delete(:params)
         options_to_merge = params_hash.nil? ? {} : params_hash
-        merged_options = { :includeInvoiceComponents => true }.merge(options_to_merge)
+        merged_options = { includeInvoiceComponents: true }.merge(options_to_merge)
         self.class.get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/invoices",
-                 merged_options,
-                 options,
-                 Invoice
+                       merged_options,
+                       options,
+                       Invoice
       end
 
       def migration_invoices(options = {})
         self.class.get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/invoices",
                        {
-                           :withMigrationInvoices => true
+                         withMigrationInvoices: true
                        },
                        options,
                        Invoice
@@ -197,8 +203,8 @@ module KillBillClient
                        OverdueStateAttributes
       end
 
-      def children(with_balance = false, with_balance_and_cba = false, audit='NONE', options = {})
-        Account::find_children(self.account_id, with_balance, with_balance_and_cba, audit, options)
+      def children(with_balance = false, with_balance_and_cba = false, audit = 'NONE', options = {})
+        Account.find_children(account_id, with_balance, with_balance_and_cba, audit, options)
       end
 
       def auto_pay_off?(options = {})
@@ -276,15 +282,15 @@ module KillBillClient
       def add_email(email, user = nil, reason = nil, comment = nil, options = {})
         self.class.post "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/emails",
                         {
-                            # TODO Required ATM
-                            :accountId => account_id,
-                            :email     => email
+                          # TODO: Required ATM
+                          accountId: account_id,
+                          email: email
                         }.to_json,
                         {},
                         {
-                            :user    => user,
-                            :reason  => reason,
-                            :comment => comment,
+                          user: user,
+                          reason: reason,
+                          comment: comment
                         }.merge(options)
       end
 
@@ -293,16 +299,16 @@ module KillBillClient
                           {},
                           {},
                           {
-                              :user    => user,
-                              :reason  => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
       end
 
       def emails(audit = 'NONE', options = {})
         self.class.get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/emails",
                        {
-                           :audit => audit
+                         audit: audit
                        },
                        options,
                        AccountEmailAttributes
@@ -345,11 +351,9 @@ module KillBillClient
                        params,
                        options,
                        BlockingStateAttributes
-
       end
 
       def set_blocking_state(state_name, service, is_block_change, is_block_entitlement, is_block_billing, requested_date = nil, user = nil, reason = nil, comment = nil, options = {})
-
         params = {}
         params[:requestedDate] = requested_date if requested_date
 
@@ -364,30 +368,30 @@ module KillBillClient
                         body.to_json,
                         params,
                         {
-                            :user => user,
-                            :reason => reason,
-                            :comment => comment,
+                          user: user,
+                          reason: reason,
+                          comment: comment
                         }.merge(options)
         blocking_states(nil, nil, 'NONE', options)
       end
 
       def cba_rebalancing(user = nil, reason = nil, comment = nil, options = {})
         self.class.put "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/cbaRebalancing",
-                        {},
-                        {},
-                        {
-                            :user    => user,
-                            :reason  => reason,
-                            :comment => comment,
-                        }.merge(options)
+                       {},
+                       {},
+                       {
+                         user: user,
+                         reason: reason,
+                         comment: comment
+                       }.merge(options)
       end
 
-      def invoice_payments(audit='NONE', with_plugin_info = false, with_attempts = false, options = {})
+      def invoice_payments(audit = 'NONE', with_plugin_info = false, with_attempts = false, options = {})
         self.class.get "#{KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/invoicePayments",
                        {
-                           :audit                    => audit,
-                           :withPluginInfo       => with_plugin_info,
-                           :withAttempts => with_attempts
+                         audit: audit,
+                         withPluginInfo: with_plugin_info,
+                         withAttempts: with_attempts
                        },
                        options,
                        InvoicePayment
@@ -399,7 +403,6 @@ module KillBillClient
                        options,
                        AuditLog
       end
-
     end
   end
 end

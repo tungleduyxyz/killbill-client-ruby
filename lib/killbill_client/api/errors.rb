@@ -1,29 +1,28 @@
+# frozen_string_literal: true
+
 require 'cgi'
 
 module KillBillClient
   class API
     # The superclass to all errors that occur when making an API request.
     class ResponseError < Error
-      attr_reader :request
-      attr_reader :response
+      attr_reader :request, :response
 
       def initialize(request, response)
-        @request, @response = request, response
+        @request = request
+        @response = response
       end
 
       def code
-        response.code.to_i if response and response.code
+        response&.code&.to_i
       end
 
       def to_s
-        if description
-          return CGI.unescapeHTML description
-        end
+        return CGI.unescapeHTML description if description
 
         return super unless code
-        '%d %s (%s %s)' % [
-            code, http_error, request.method, API.base_uri + request.path
-        ]
+
+        format('%d %s (%s %s)', code, http_error, request.method, API.base_uri + request.path)
       end
 
       def self.error_for(status, request, response)
@@ -33,7 +32,7 @@ module KillBillClient
       private
 
       def description
-        @response.body.strip if @response.body
+        @response.body&.strip
       end
 
       def http_error
@@ -172,32 +171,32 @@ module KillBillClient
     end
 
     # Error mapping by status code.
-    ERRORS = Hash.new { |hash, code|
+    ERRORS = Hash.new do |hash, code|
       unless hash.key? code
         case code
-          when 400...500 then
-            ClientError
-          when 500...600 then
-            ServerError
-          else
-            ResponseError
+        when 400...500
+          ClientError
+        when 500...600
+          ServerError
+        else
+          ResponseError
         end
       end
-    }.update(
-        304 => NotModified,
-        400 => BadRequest,
-        401 => Unauthorized,
-        402 => PaymentRequired,
-        403 => Forbidden,
-        404 => NotFound,
-        406 => NotAcceptable,
-        409 => Conflict,
-        415 => UnsupportedMediaType,
-        422 => UnprocessableEntity,
-        500 => InternalServerError,
-        502 => GatewayError,
-        503 => ServiceUnavailable,
-        504 => GatewayTimeout
+    end.update(
+      304 => NotModified,
+      400 => BadRequest,
+      401 => Unauthorized,
+      402 => PaymentRequired,
+      403 => Forbidden,
+      404 => NotFound,
+      406 => NotAcceptable,
+      409 => Conflict,
+      415 => UnsupportedMediaType,
+      422 => UnprocessableEntity,
+      500 => InternalServerError,
+      502 => GatewayError,
+      503 => ServiceUnavailable,
+      504 => GatewayTimeout
     ).freeze
   end
 end

@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     module TagHelper
-
       AUTO_PAY_OFF_ID            = '00000000-0000-0000-0000-000000000001'
       AUTO_INVOICING_OFF_ID      = '00000000-0000-0000-0000-000000000002'
       OVERDUE_ENFORCEMENT_OFF_ID = '00000000-0000-0000-0000-000000000003'
@@ -30,7 +31,7 @@ module KillBillClient
 
       def set_tags(tag_definition_ids, user = nil, reason = nil, comment = nil, options = {})
         begin
-          current_tag_definition_ids = tags(false, 'NONE', options).map { |tag| tag.tag_definition_id }
+          current_tag_definition_ids = tags(false, 'NONE', options).map(&:tag_definition_id)
         rescue KillBillClient::API::NotFound
           current_tag_definition_ids = []
         end
@@ -58,23 +59,21 @@ module KillBillClient
 
       module ClassMethods
         def has_tags(url_prefix, id_alias)
-          define_method('tags') do |*args|
-
+          define_method(:tags) do |*args|
             included_deleted = args[0] || false
             audit = args[1] || 'NONE'
             options = args[2] || {}
 
             self.class.get "#{url_prefix}/#{send(id_alias)}/tags",
                            {
-                               :includedDeleted => included_deleted,
-                               :audit           => audit
+                             includedDeleted: included_deleted,
+                             audit: audit
                            },
                            options,
                            Tag
           end
 
-          define_method('add_tags_from_definition_ids') do |*args|
-
+          define_method(:add_tags_from_definition_ids) do |*args|
             tag_definition_ids = args[0]
             user = args[1]
             reason = args[2]
@@ -85,16 +84,15 @@ module KillBillClient
                                           tag_definition_ids,
                                           {},
                                           {
-                                              :user    => user,
-                                              :reason  => reason,
-                                              :comment => comment,
+                                            user: user,
+                                            reason: reason,
+                                            comment: comment
                                           }.merge(options),
                                           Tag
             created_tag.refresh(options)
           end
 
-          define_method('remove_tags_from_definition_ids') do |*args|
-
+          define_method(:remove_tags_from_definition_ids) do |*args|
             tag_definition_ids = args[0]
             user = args[1]
             reason = args[2]
@@ -104,12 +102,12 @@ module KillBillClient
             self.class.delete "#{url_prefix}/#{send(id_alias)}/tags",
                               {},
                               {
-                                  :tagDef => tag_definition_ids
+                                tagDef: tag_definition_ids
                               },
                               {
-                                  :user    => user,
-                                  :reason  => reason,
-                                  :comment => comment,
+                                user: user,
+                                reason: reason,
+                                comment: comment
                               }.merge(options)
           end
         end

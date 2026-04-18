@@ -1,11 +1,12 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class RolledUpUsage < RolledUpUsageAttributes
-
       has_many :audit_logs, KillBillClient::Model::AuditLog
       has_many :rolled_up_units, KillBillClient::Model::RolledUpUnitAttributes
 
-      KILLBILL_API_USAGES_PREFIX = "#{KILLBILL_API_PREFIX}/usages"
+      KILLBILL_API_USAGES_PREFIX = "#{KILLBILL_API_PREFIX}/usages".freeze
 
       class << self
         def find_by_subscription_id(subscription_id, start_date, end_date, options = {})
@@ -13,9 +14,9 @@ module KillBillClient
         end
 
         def find_by_subscription_id_and_type(subscription_id, start_date, end_date, unit_type, options = {})
-          params                  = {}
+          params = {}
           params[:startDate] = start_date
-          params[:endDate]  = end_date
+          params[:endDate] = end_date
 
           path = "#{KILLBILL_API_USAGES_PREFIX}/#{subscription_id}"
           path = "#{path}/#{unit_type}" if unit_type
@@ -24,7 +25,6 @@ module KillBillClient
               options
         end
       end
-
     end
   end
 end

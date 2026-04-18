@@ -1,15 +1,16 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class UserRoles < UserRolesAttributes
-
       def create(user = nil, reason = nil, comment = nil, options = {})
         created_user = self.class.post "#{Security::KILLBILL_API_SECURITY_PREFIX}/users",
                                        to_json,
                                        {},
                                        {
-                                           :user => user,
-                                           :reason => reason,
-                                           :comment => comment,
+                                         user: user,
+                                         reason: reason,
+                                         comment: comment
                                        }.merge(options)
         created_user.refresh(options)
       end
@@ -20,9 +21,9 @@ module KillBillClient
                                       to_json,
                                       {},
                                       {
-                                          :user => user,
-                                          :reason => reason,
-                                          :comment => comment,
+                                        user: user,
+                                        reason: reason,
+                                        comment: comment
                                       }.merge(options)
         updated_user.refresh(options)
       end
@@ -32,9 +33,9 @@ module KillBillClient
                           {},
                           {},
                           {
-                              :user => user,
-                              :reason => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
       end
 

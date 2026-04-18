@@ -1,8 +1,14 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe KillBillClient::Model::Resource do
+  before do
+    KillBillClient.api_key = nil
+    KillBillClient.api_secret = nil
+  end
 
-  it 'should be able to be instantiated from hash' do
+  it 'is able to be instantiated from hash' do
     payment1 = KillBillClient::Model::InvoicePayment.new
     payment1.account_id = '1234'
     payment1.target_invoice_id = '5678'
@@ -16,11 +22,6 @@ describe KillBillClient::Model::Resource do
     expect(payment2.purchased_amount).to eq(12.42)
   end
 
-  before do
-    KillBillClient.api_key = nil
-    KillBillClient.api_secret = nil
-  end
-
   describe '#require_multi_tenant_options!' do
     let(:message) { 'nothing' }
 
@@ -31,8 +32,8 @@ describe KillBillClient::Model::Resource do
     context 'when api_key and api_secret passed as options' do
       let(:options) do
         {
-          :api_key => 'bob',
-          :api_secret =>'lazar'
+          api_key: 'bob',
+          api_secret: 'lazar'
         }
       end
 
@@ -44,7 +45,7 @@ describe KillBillClient::Model::Resource do
     context 'when no api_key passed as options' do
       let(:options) do
         {
-          :api_secret => 'lazar'
+          api_secret: 'lazar'
         }
       end
 
@@ -56,7 +57,7 @@ describe KillBillClient::Model::Resource do
     context 'when no api_secret passed as options' do
       let(:options) do
         {
-          :api_key => 'bob'
+          api_key: 'bob'
         }
       end
 
@@ -66,10 +67,11 @@ describe KillBillClient::Model::Resource do
     end
 
     context 'when api_key and api_secret passed as KillBillClient configuration option' do
-      let(:options) { { } }
+      let(:options) { {} }
+
       before do
-        allow(KillBillClient).to receive_messages(:api_key => 'bob')
-        allow(KillBillClient).to receive_messages(:api_secret => 'lazar')
+        allow(KillBillClient).to receive_messages(api_key: 'bob')
+        allow(KillBillClient).to receive_messages(api_secret: 'lazar')
       end
 
       it do

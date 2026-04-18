@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module KillBillClient
   # The API class handles all requests to the Kill Bill API. While most of its
   # functionality is leveraged by the Resource class, it can be used directly,
@@ -18,7 +20,7 @@ module KillBillClient
       # Additional HTTP headers sent with each API call
       # @return [Hash{String => String}]
       def headers
-        @headers ||= {'Accept' => accept, 'User-Agent' => user_agent}
+        @headers ||= { 'Accept' => accept, 'User-Agent' => user_agent }
       end
 
       # @return [String, nil] Accept-Language header value
@@ -34,37 +36,37 @@ module KillBillClient
       # @return [Net::HTTPOK, Net::HTTPResponse]
       # @raise [ResponseError] With a non-2xx status code.
       def head(uri, params = {}, options = {})
-        request :head, uri, {:params => params}.merge(options)
+        request :head, uri, { params: params }.merge(options)
       end
 
       # @return [Net::HTTPOK, Net::HTTPResponse]
       # @raise [ResponseError] With a non-2xx status code.
       def get(uri, params = {}, options = {})
-        request :get, uri, {:params => params}.merge(options)
+        request :get, uri, { params: params }.merge(options)
       end
 
       # @return [Net::HTTPCreated, Net::HTTPResponse]
       # @raise [ResponseError] With a non-2xx status code.
       def post(uri, body = nil, params = {}, options = {})
-        request :post, uri, {:body => body.to_s}.merge({:params => params}).merge(options)
+        request :post, uri, { body: body.to_s }.merge({ params: params }).merge(options)
       end
 
       # @return [Net::HTTPOK, Net::HTTPResponse]
       # @raise [ResponseError] With a non-2xx status code.
       def put(uri, body = nil, params = {}, options = {})
-        request :put, uri, {:body => body.to_s}.merge({:params => params}).merge(options)
+        request :put, uri, { body: body.to_s }.merge({ params: params }).merge(options)
       end
 
       # @return [Net::HTTPNoContent, Net::HTTPResponse]
       # @raise [ResponseError] With a non-2xx status code.
       def delete(uri, body = nil, params = {}, options = {})
-        request :delete, uri, {:body => body.to_s}.merge({:params => params}).merge(options)
+        request :delete, uri, { body: body.to_s }.merge({ params: params }).merge(options)
       end
 
       # @return [URI::HTTP]
       def base_uri
         parsed_uri = URI.parse(KillBillClient.url)
-        parsed_uri = URI.parse("http://" + KillBillClient.url) unless parsed_uri.is_a?(URI::HTTP)
+        parsed_uri = URI.parse("http://#{KillBillClient.url}") unless parsed_uri.is_a?(URI::HTTP)
         parsed_uri
       end
 

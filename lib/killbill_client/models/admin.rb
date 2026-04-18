@@ -1,39 +1,40 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class Admin < AdminPaymentAttributes
+      KILLBILL_API_ADMIN_PREFIX = "#{KILLBILL_API_PREFIX}/admin".freeze
+      KILLBILL_API_QUEUES_PREFIX = "#{KILLBILL_API_ADMIN_PREFIX}/queues".freeze
 
-      KILLBILL_API_ADMIN_PREFIX = "#{KILLBILL_API_PREFIX}/admin"
-      KILLBILL_API_QUEUES_PREFIX = "#{KILLBILL_API_ADMIN_PREFIX}/queues"
-
-      KILLBILL_API_CLOCK_PREFIX = "#{KILLBILL_API_PREFIX}/test/clock"
+      KILLBILL_API_CLOCK_PREFIX = "#{KILLBILL_API_PREFIX}/test/clock".freeze
 
       class << self
         def get_queues_entries(account_id, queue_name = '', service_name = '', with_history = true, min_date = '', max_date = '', with_in_processing = true, with_bus_events = true, with_notifications = true, options = {})
           get KILLBILL_API_QUEUES_PREFIX,
-                    {
-                        :accountId => account_id,
-                        :queueName => queue_name,
-                        :serviceName => service_name,
-                        :withHistory => with_history,
-                        :minDate => min_date,
-                        :maxDate => max_date,
-                        :withInProcessing => with_in_processing,
-                        :withBusEvents => with_bus_events,
-                        :withNotifications => with_notifications
-                    },
-                    {
-                        :accept => 'application/octet-stream'
-                    }.merge(options)
+              {
+                accountId: account_id,
+                queueName: queue_name,
+                serviceName: service_name,
+                withHistory: with_history,
+                minDate: min_date,
+                maxDate: max_date,
+                withInProcessing: with_in_processing,
+                withBusEvents: with_bus_events,
+                withNotifications: with_notifications
+              },
+              {
+                accept: 'application/octet-stream'
+              }.merge(options)
         end
 
         def fix_transaction_state(payment_id, transaction_id, transaction_status, payment_state_param = {}, user = nil, reason = nil, comment = nil, options = {})
           put "#{KILLBILL_API_ADMIN_PREFIX}/payments/#{payment_id}/transactions/#{transaction_id}",
-              {:transactionStatus => transaction_status}.merge(payment_state_param).to_json,
+              { transactionStatus: transaction_status }.merge(payment_state_param).to_json,
               {},
               {
-                  :user => user,
-                  :reason => reason,
-                  :comment => comment,
+                user: user,
+                reason: reason,
+                comment: comment
               }.merge(options)
         end
 
@@ -41,36 +42,36 @@ module KillBillClient
           post "#{KILLBILL_API_ADMIN_PREFIX}/invoices",
                {},
                {
-                   :offset => offset,
-                   :limit => limit,
-                   :pluginProperty => plugin_property
+                 offset: offset,
+                 limit: limit,
+                 pluginProperty: plugin_property
                },
                {
-                  :user => user,
-                  :reason => reason,
-                  :comment => comment,
+                 user: user,
+                 reason: reason,
+                 comment: comment
                }.merge(options)
         end
 
         def put_in_rotation(options = {})
           put "#{KILLBILL_API_ADMIN_PREFIX}/healthcheck",
-               {},
-               {},
-               {}.merge(options)
+              {},
+              {},
+              {}.merge(options)
         end
 
         def put_out_of_rotation(options = {})
           delete "#{KILLBILL_API_ADMIN_PREFIX}/healthcheck",
-              {},
-              {},
-              {}.merge(options)
+                 {},
+                 {},
+                 {}.merge(options)
         end
 
         def invalidates_cache(cache_name = nil, options = {})
           delete "#{KILLBILL_API_ADMIN_PREFIX}/cache",
                  {},
                  {
-                     :cacheName => cache_name
+                   cacheName: cache_name
                  },
                  {}.merge(options)
         end
@@ -132,7 +133,6 @@ module KillBillClient
 
           JSON.parse res.body
         end
-
       end
     end
   end

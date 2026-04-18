@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Copyright 2010-2013 Ning, Inc.
 #
@@ -14,7 +16,7 @@
 # under the License.
 #
 
-$LOAD_PATH.unshift File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift File.expand_path('lib', __dir__)
 require 'killbill_client/version'
 
 Gem::Specification.new do |s|
@@ -32,14 +34,14 @@ Gem::Specification.new do |s|
   s.homepage = 'http://www.killbilling.org'
 
   s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.bindir        = 'bin'
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  s.require_paths = ["lib"]
+  s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
+  s.require_paths = ['lib']
 
   s.rdoc_options << '--exclude' << '.'
 
   s.add_development_dependency 'gem-release', '~> 2.2'
   s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.4'
+  s.metadata['rubygems_mfa_required'] = 'true'
 end

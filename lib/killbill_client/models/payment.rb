@@ -1,12 +1,13 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class Payment < PaymentAttributes
-
       include KillBillClient::Model::CustomFieldHelper
       include KillBillClient::Model::TagHelper
       include KillBillClient::Model::AuditLogWithHistoryHelper
 
-      KILLBILL_API_PAYMENTS_PREFIX = "#{KILLBILL_API_PREFIX}/payments"
+      KILLBILL_API_PAYMENTS_PREFIX = "#{KILLBILL_API_PREFIX}/payments".freeze
 
       has_many :transactions, KillBillClient::Model::Transaction
       has_many :payment_attempts, KillBillClient::Model::PaymentAttemptAttributes
@@ -20,18 +21,18 @@ module KillBillClient
         def find_by_id(payment_id, with_plugin_info = false, with_attempts = false, options = {})
           get "#{KILLBILL_API_PAYMENTS_PREFIX}/#{payment_id}",
               {
-                  :withAttempts => with_attempts,
-                  :withPluginInfo => with_plugin_info
+                withAttempts: with_attempts,
+                withPluginInfo: with_plugin_info
               },
               options
         end
 
         def find_by_external_key(external_key, with_plugin_info = false, with_attempts = false, options = {})
-          get "#{KILLBILL_API_PAYMENTS_PREFIX}",
+          get KILLBILL_API_PAYMENTS_PREFIX.to_s,
               {
-                  :externalKey => external_key,
-                  :withAttempts => with_attempts,
-                  :withPluginInfo => with_plugin_info
+                externalKey: external_key,
+                withAttempts: with_attempts,
+                withPluginInfo: with_plugin_info
               },
               options
         end
@@ -39,22 +40,22 @@ module KillBillClient
         def find_by_transaction_id(transaction_id, with_plugin_info = false, with_attempts = false, plugin_property = [], audit = 'NONE', options = {})
           get "#{Transaction::KILLBILL_API_TRANSACTIONS_PREFIX}/#{transaction_id}",
               {
-                  :withPluginInfo => with_plugin_info,
-                  :withAttempts => with_attempts,
-                  :pluginProperty => plugin_property,
-                  :audit => audit
+                withPluginInfo: with_plugin_info,
+                withAttempts: with_attempts,
+                pluginProperty: plugin_property,
+                audit: audit
               },
               options
         end
 
         def find_by_transaction_external_key(external_key, with_plugin_info = false, with_attempts = false, plugin_property = [], audit = 'NONE', options = {})
-          get "#{Transaction::KILLBILL_API_TRANSACTIONS_PREFIX}",
+          get Transaction::KILLBILL_API_TRANSACTIONS_PREFIX.to_s,
               {
-                  :transactionExternalKey => external_key,
-                  :withPluginInfo => with_plugin_info,
-                  :withAttempts => with_attempts,
-                  :pluginProperty => plugin_property,
-                  :audit => audit
+                transactionExternalKey: external_key,
+                withPluginInfo: with_plugin_info,
+                withAttempts: with_attempts,
+                pluginProperty: plugin_property,
+                audit: audit
               },
               options
         end
@@ -62,8 +63,8 @@ module KillBillClient
         def find_in_batches(offset = 0, limit = 100, options = {})
           get "#{KILLBILL_API_PAYMENTS_PREFIX}/#{Resource::KILLBILL_API_PAGINATION_PREFIX}",
               {
-                  :offset => offset,
-                  :limit  => limit
+                offset: offset,
+                limit: limit
               },
               options
         end
@@ -71,17 +72,17 @@ module KillBillClient
         def find_in_batches_by_search_key(search_key, offset = 0, limit = 100, options = {})
           get "#{KILLBILL_API_PAYMENTS_PREFIX}/search/#{search_key}",
               {
-                  :offset => offset,
-                  :limit  => limit
+                offset: offset,
+                limit: limit
               },
               options
         end
 
         def attempt_audit_logs_with_history(payment_attempt_id, options = {})
           get "#{KILLBILL_API_PAYMENTS_PREFIX}/attempts/#{payment_attempt_id}/auditLogsWithHistory",
-                         {},
-                         options,
-                         AuditLog
+              {},
+              options,
+              AuditLog
         end
       end
     end

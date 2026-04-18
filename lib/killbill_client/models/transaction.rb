@@ -1,14 +1,15 @@
+# frozen_string_literal: true
+
 require 'killbill_client/api/errors'
 
 module KillBillClient
   module Model
     class Transaction < PaymentTransactionAttributes
-
       include KillBillClient::Model::CustomFieldHelper
       include KillBillClient::Model::AuditLogWithHistoryHelper
       include KillBillClient::Model::TagHelper
 
-      KILLBILL_API_TRANSACTIONS_PREFIX = "#{KILLBILL_API_PREFIX}/paymentTransactions"
+      KILLBILL_API_TRANSACTIONS_PREFIX = "#{KILLBILL_API_PREFIX}/paymentTransactions".freeze
 
       has_many :properties, KillBillClient::Model::PluginPropertyAttributes
       has_many :audit_logs, KillBillClient::Model::AuditLog
@@ -37,19 +38,19 @@ module KillBillClient
 
       def auth_by_external_key(account_external_key, payment_method_id = nil, user = nil, reason = nil, comment = nil, options = {}, refresh_options = nil)
         @transaction_type = 'AUTHORIZE'
-        query_map = {:externalKey => account_external_key}
+        query_map = { externalKey: account_external_key }
         create_initial_transaction("#{Account::KILLBILL_API_ACCOUNTS_PREFIX}/payments", query_map, payment_method_id, user, reason, comment, options, refresh_options)
       end
 
       def purchase_by_external_key(account_external_key, payment_method_id = nil, user = nil, reason = nil, comment = nil, options = {}, refresh_options = nil)
         @transaction_type = 'PURCHASE'
-        query_map = {:externalKey => account_external_key}
+        query_map = { externalKey: account_external_key }
         create_initial_transaction("#{Account::KILLBILL_API_ACCOUNTS_PREFIX}/payments", query_map, payment_method_id, user, reason, comment, options, refresh_options)
       end
 
       def credit_by_external_key(account_external_key, payment_method_id = nil, user = nil, reason = nil, comment = nil, options = {}, refresh_options = nil)
         @transaction_type = 'CREDIT'
-        query_map = {:externalKey => account_external_key}
+        query_map = { externalKey: account_external_key }
         create_initial_transaction("#{Account::KILLBILL_API_ACCOUNTS_PREFIX}/payments", query_map, payment_method_id, user, reason, comment, options, refresh_options)
       end
 
@@ -75,13 +76,13 @@ module KillBillClient
       def capture(user = nil, reason = nil, comment = nil, options = {}, refresh_options = nil)
         follow_location = delete_follow_location(options)
         refresh_payment_with_failure_handling(follow_location, refresh_options || options) do
-          self.class.post "#{follow_up_path(payment_id)}",
+          self.class.post follow_up_path(payment_id).to_s,
                           to_json,
                           {},
                           {
-                              :user    => user,
-                              :reason  => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
         end
       end
@@ -93,9 +94,9 @@ module KillBillClient
                           to_json,
                           {},
                           {
-                              :user    => user,
-                              :reason  => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
         end
       end
@@ -107,9 +108,9 @@ module KillBillClient
                           to_json,
                           {},
                           {
-                              :user    => user,
-                              :reason  => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
         end
       end
@@ -117,13 +118,13 @@ module KillBillClient
       def void(user = nil, reason = nil, comment = nil, options = {}, refresh_options = nil)
         follow_location = delete_follow_location(options)
         refresh_payment_with_failure_handling(follow_location, refresh_options || options) do
-          self.class.delete "#{follow_up_path(payment_id)}",
+          self.class.delete follow_up_path(payment_id).to_s,
                             to_json,
                             {},
                             {
-                                :user    => user,
-                                :reason  => reason,
-                                :comment => comment,
+                              user: user,
+                              reason: reason,
+                              comment: comment
                             }.merge(options)
           if payment_external_key
             KillBillClient::Model::Payment.find_by_external_key(payment_external_key, false, false, options)
@@ -140,18 +141,19 @@ module KillBillClient
                           to_json,
                           {},
                           {
-                              :user    => user,
-                              :reason  => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
         end
       end
 
-
       def cancel_scheduled_payment(user = nil, reason = nil, comment = nil, options = {})
-
-        uri = transaction_external_key ? "#{Payment::KILLBILL_API_PAYMENTS_PREFIX}/cancelScheduledPaymentTransaction" :
-            "#{Payment::KILLBILL_API_PAYMENTS_PREFIX}/#{transaction_id}/cancelScheduledPaymentTransaction"
+        uri = if transaction_external_key
+                "#{Payment::KILLBILL_API_PAYMENTS_PREFIX}/cancelScheduledPaymentTransaction"
+              else
+                "#{Payment::KILLBILL_API_PAYMENTS_PREFIX}/#{transaction_id}/cancelScheduledPaymentTransaction"
+              end
 
         query_map = {}
         query_map[:transactionExternalKey] = transaction_external_key if transaction_external_key
@@ -159,53 +161,52 @@ module KillBillClient
                           {},
                           query_map,
                           {
-                              :user    => user,
-                              :reason  => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
       end
 
       def chargeback_by_external_key(user = nil, reason = nil, comment = nil, options = {}, refresh_options = nil)
         follow_location = delete_follow_location(options)
         refresh_payment_with_failure_handling(follow_location, refresh_options || options) do
-        self.class.post "#{follow_up_path(payment_id)}/chargebacks",
-                        to_json,
-                        {},
-                        {
-                            :user    => user,
-                            :reason  => reason,
-                            :comment => comment,
-                        }.merge(options)
-          end
+          self.class.post "#{follow_up_path(payment_id)}/chargebacks",
+                          to_json,
+                          {},
+                          {
+                            user: user,
+                            reason: reason,
+                            comment: comment
+                          }.merge(options)
+        end
       end
 
       def chargeback_reversals(user = nil, reason = nil, comment = nil, options = {}, refresh_options = nil)
         follow_location = delete_follow_location(options)
         refresh_payment_with_failure_handling(follow_location, refresh_options || options) do
-        self.class.post "#{follow_up_path(payment_id)}/chargebackReversals",
-                        to_json,
-                        {},
-                        {
-                            :user    => user,
-                            :reason  => reason,
-                            :comment => comment,
-                        }.merge(options)
-          end
+          self.class.post "#{follow_up_path(payment_id)}/chargebackReversals",
+                          to_json,
+                          {},
+                          {
+                            user: user,
+                            reason: reason,
+                            comment: comment
+                          }.merge(options)
+        end
       end
 
       def update_transaction_state(status, control_plugin_name = nil, user, reason, comment, options)
         self.class.post "KILLBILL_API_TRANSACTIONS_PREFIX/#{transaction_id}",
-                       {:paymentId => payment_id, :status => status}.to_json,
-                       {:controlPluginName => (control_plugin_name || [])},
-                       {
-                          :user => user,
-                          :reason => reason,
-                          :comment => comment
-                       }.merge(options)
+                        { paymentId: payment_id, status: status }.to_json,
+                        { controlPluginName: control_plugin_name || [] },
+                        {
+                          user: user,
+                          reason: reason,
+                          comment: comment
+                        }.merge(options)
       end
 
       private
-
 
       def follow_up_path(payment_id)
         path = Payment::KILLBILL_API_PAYMENTS_PREFIX
@@ -222,9 +223,9 @@ module KillBillClient
                           to_json,
                           query_map,
                           {
-                              :user => user,
-                              :reason => reason,
-                              :comment => comment
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
         end
       end
@@ -236,9 +237,9 @@ module KillBillClient
                          to_json,
                          {},
                          {
-                             :user => user,
-                             :reason => reason,
-                             :comment => comment
+                           user: user,
+                           reason: reason,
+                           comment: comment
                          }.merge(options)
           if payment_external_key
             KillBillClient::Model::Payment.find_by_external_key(payment_external_key, false, false, options)
@@ -249,9 +250,7 @@ module KillBillClient
       end
 
       def delete_follow_location(options, key = :follow_location, default_value = true)
-        if options.has_key?(key)
-          return options.delete(key)
-        end
+        return options.delete(key) if options.key?(key)
 
         default_value
       end
@@ -259,19 +258,15 @@ module KillBillClient
       def refresh_payment_with_failure_handling(follow_location, refresh_options)
         begin
           created_transaction = yield
-        rescue KillBillClient::API::ResponseError => error
-          response = error.response
-          if follow_location && response['location']
-            created_transaction = Transaction.new
-            created_transaction.uri = response['location']
-          else
-            raise error
-          end
+        rescue KillBillClient::API::ResponseError => e
+          response = e.response
+          raise e unless follow_location && response['location']
+
+          created_transaction = Transaction.new
+          created_transaction.uri = response['location']
         end
 
-        if follow_location
-          return created_transaction.refresh(refresh_options, Payment)
-        end
+        return created_transaction.refresh(refresh_options, Payment) if follow_location
 
         created_payment = Payment.new
         created_payment.uri = created_transaction.uri

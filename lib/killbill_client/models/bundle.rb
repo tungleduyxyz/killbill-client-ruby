@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class Bundle < BundleAttributes
-
-      KILLBILL_API_BUNDLES_PREFIX = "#{KILLBILL_API_PREFIX}/bundles"
+      KILLBILL_API_BUNDLES_PREFIX = "#{KILLBILL_API_PREFIX}/bundles".freeze
 
       include KillBillClient::Model::TagHelper
       include KillBillClient::Model::CustomFieldHelper
@@ -19,8 +20,8 @@ module KillBillClient
         def find_in_batches(offset = 0, limit = 100, options = {})
           get "#{KILLBILL_API_BUNDLES_PREFIX}/#{Resource::KILLBILL_API_PAGINATION_PREFIX}",
               {
-                  :offset => offset,
-                  :limit  => limit
+                offset: offset,
+                limit: limit
               },
               options
         end
@@ -28,8 +29,8 @@ module KillBillClient
         def find_in_batches_by_search_key(search_key, offset = 0, limit = 100, options = {})
           get "#{KILLBILL_API_BUNDLES_PREFIX}/search/#{search_key}",
               {
-                  :offset => offset,
-                  :limit  => limit
+                offset: offset,
+                limit: limit
               },
               options
         end
@@ -46,10 +47,10 @@ module KillBillClient
           params[:externalKey] = external_key
           params[:includedDeleted] = included_deleted if included_deleted
 
-          result  = get "#{KILLBILL_API_BUNDLES_PREFIX}",
-              params,
-              options
-          return included_deleted ? result : result[0]
+          result = get KILLBILL_API_BUNDLES_PREFIX.to_s,
+                       params,
+                       options
+          included_deleted ? result : result[0]
         end
 
         # Return active and inactive ones
@@ -58,7 +59,6 @@ module KillBillClient
               {},
               options
         end
-
       end
 
       # Transfer the bundle to the new account. The new account_id should be set in this object
@@ -68,52 +68,47 @@ module KillBillClient
         params[:billingPolicy] = billing_policy unless billing_policy.nil?
 
         result                 = self.class.post "#{KILLBILL_API_BUNDLES_PREFIX}/#{bundle_id}",
-                                                to_json,
-                                                params,
-                                                {
-                                                    :user    => user,
-                                                    :reason  => reason,
-                                                    :comment => comment,
-                                                }.merge(options)
+                                                 to_json,
+                                                 params,
+                                                 {
+                                                   user: user,
+                                                   reason: reason,
+                                                   comment: comment
+                                                 }.merge(options)
 
         result.refresh(options)
       end
 
       # Pause the bundle (and all its subscription)
       def pause(requested_date = nil, user = nil, reason = nil, comment = nil, options = {})
-
         params                 = {}
         params[:requestedDate] = requested_date unless requested_date.nil?
         self.class.put "#{KILLBILL_API_BUNDLES_PREFIX}/#{@bundle_id}/pause",
                        {},
                        params,
                        {
-                           :user    => user,
-                           :reason  => reason,
-                           :comment => comment,
+                         user: user,
+                         reason: reason,
+                         comment: comment
                        }.merge(options)
       end
 
       # Resume the bundle (and all its subscription)
       def resume(requested_date = nil, user = nil, reason = nil, comment = nil, options = {})
-
         params                 = {}
         params[:requestedDate] = requested_date unless requested_date.nil?
         self.class.put "#{KILLBILL_API_BUNDLES_PREFIX}/#{@bundle_id}/resume",
                        {},
                        params,
                        {
-                           :user    => user,
-                           :reason  => reason,
-                           :comment => comment,
+                         user: user,
+                         reason: reason,
+                         comment: comment
                        }.merge(options)
       end
 
-
-
       # Low level api to block/unblock a given subscription/bundle/account
       def set_blocking_state(state_name, service, is_block_change, is_block_entitlement, is_block_billing, requested_date = nil, user = nil, reason = nil, comment = nil, options = {})
-
         params                 = {}
         params[:requestedDate] = requested_date unless requested_date.nil?
 
@@ -125,27 +120,25 @@ module KillBillClient
         body.is_block_billing = is_block_billing
 
         self.class.post "#{KILLBILL_API_BUNDLES_PREFIX}/#{@bundle_id}/block",
-                       body.to_json,
-                       params,
-                       {
-                           :user    => user,
-                           :reason  => reason,
-                           :comment => comment,
-                       }.merge(options)
+                        body.to_json,
+                        params,
+                        {
+                          user: user,
+                          reason: reason,
+                          comment: comment
+                        }.merge(options)
       end
 
       def rename_external_key(user = nil, reason = nil, comment = nil, options = {})
-
         self.class.put "#{KILLBILL_API_BUNDLES_PREFIX}/#{@bundle_id}/renameKey",
                        to_json,
                        {},
                        {
-                           :user    => user,
-                           :reason  => reason,
-                           :comment => comment,
+                         user: user,
+                         reason: reason,
+                         comment: comment
                        }.merge(options)
       end
-
     end
   end
 end

@@ -1,17 +1,17 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class UsageRecord < SubscriptionUsageRecordAttributes
-
       has_many :audit_logs, KillBillClient::Model::AuditLog
 
-
-      KILLBILL_API_USAGES_PREFIX = "#{KILLBILL_API_PREFIX}/usages"
+      KILLBILL_API_USAGES_PREFIX = "#{KILLBILL_API_PREFIX}/usages".freeze
 
       class << self
         def find_by_subscription_id(subscription_id, start_date, end_date, options = {})
-          params                  = {}
+          params = {}
           params[:startDate] = start_date
-          params[:endDate]  = end_date
+          params[:endDate] = end_date
 
           get "#{KILLBILL_API_USAGES_PREFIX}/#{subscription_id}",
               params,
@@ -25,12 +25,11 @@ module KillBillClient
                         to_json,
                         {},
                         {
-                            :user => user,
-                            :reason => reason,
-                            :comment => comment,
+                          user: user,
+                          reason: reason,
+                          comment: comment
                         }.merge(options)
       end
-
     end
   end
 end

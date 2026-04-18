@@ -1,10 +1,11 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class TagDefinition < TagDefinitionAttributes
-
       include KillBillClient::Model::AuditLogWithHistoryHelper
 
-      KILLBILL_API_TAG_DEFINITIONS_PREFIX = "#{KILLBILL_API_PREFIX}/tagDefinitions"
+      KILLBILL_API_TAG_DEFINITIONS_PREFIX = "#{KILLBILL_API_PREFIX}/tagDefinitions".freeze
 
       has_audit_logs_with_history KILLBILL_API_TAG_DEFINITIONS_PREFIX, :id
 
@@ -12,7 +13,7 @@ module KillBillClient
         def all(audit = 'NONE', options = {})
           get KILLBILL_API_TAG_DEFINITIONS_PREFIX,
               {
-                  :audit => audit
+                audit: audit
               },
               options
         end
@@ -20,13 +21,13 @@ module KillBillClient
         def find_by_id(id, audit = 'NONE', options = {})
           get "#{KILLBILL_API_TAG_DEFINITIONS_PREFIX}/#{id}",
               {
-                  :audit => audit
+                audit: audit
               },
               options
         end
 
         def find_by_name(name, audit = 'NONE', options = {})
-          self.all(audit, options).select { |tag_definition| tag_definition.name == name }.first
+          all(audit, options).find { |tag_definition| tag_definition.name == name }
         end
       end
 
@@ -35,9 +36,9 @@ module KillBillClient
                                                  to_json,
                                                  {},
                                                  {
-                                                     :user    => user,
-                                                     :reason  => reason,
-                                                     :comment => comment,
+                                                   user: user,
+                                                   reason: reason,
+                                                   comment: comment
                                                  }.merge(options)
         created_tag_definition.refresh(options)
       end
@@ -47,9 +48,9 @@ module KillBillClient
                           to_json,
                           {},
                           {
-                              :user    => user,
-                              :reason  => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
       end
     end

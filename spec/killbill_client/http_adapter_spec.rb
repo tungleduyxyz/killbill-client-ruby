@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe KillBillClient::API do
-
   before do
     KillBillClient.url = nil
     KillBillClient.disable_ssl_verification = nil
@@ -9,37 +10,37 @@ describe KillBillClient::API do
     KillBillClient.connection_timeout = nil
   end
 
-  let(:expected_query_params) {
+  let(:expected_query_params) do
     [
-        'controlPluginName=killbill-example-plugin',
-        'pluginProperty=contractId%3Dtest'
+      'controlPluginName=killbill-example-plugin',
+      'pluginProperty=contractId%3Dtest'
     ]
-  }
+  end
 
-  let (:ssl_uri) {URI.parse 'https://killbill.io'}
-  let (:uri) {URI.parse 'http://killbill.io'}
-  let (:options) {{:read_timeout => 10000, :connection_timeout => 5000, :disable_ssl_verification => true}}
+  let(:ssl_uri) { URI.parse 'https://killbill.io' }
+  let(:uri) { URI.parse 'http://killbill.io' }
+  let(:options) { { read_timeout: 10_000, connection_timeout: 5000, disable_ssl_verification: true } }
 
-  it 'should send double-encoded uri' do
+  it 'sends double-encoded uri' do
     contract_property = KillBillClient::Model::PluginPropertyAttributes.new
     contract_property.key = :contractId
     contract_property.value = 'test'
     info_property = KillBillClient::Model::PluginPropertyAttributes.new
     info_property.key = 'details'
     info_property_hash = {
-        'eventType' => 'voidEvent',
-        'transactionType' => 'void'
+      'eventType' => 'voidEvent',
+      'transactionType' => 'void'
     }
     info_property.value = info_property_hash.to_json
     plugin_properties = [contract_property, info_property]
     options = {
-        :params => {:controlPluginName => 'killbill-example-plugin'},
-        :pluginProperty => plugin_properties
+      params: { controlPluginName: 'killbill-example-plugin' },
+      pluginProperty: plugin_properties
     }
     http_adapter = DummyForHTTPAdapter.new
     query_string = http_adapter.send(:encode_params, options)
-    expect(query_string.chars.first).to eq('?')
-    query_params = query_string[1..-1].split('&').sort
+    expect(query_string[0]).to eq('?')
+    query_params = query_string[1..].split('&').sort
     expect(query_params.size).to eq(3)
 
     # check the first two query strings
@@ -54,25 +55,25 @@ describe KillBillClient::API do
     expect(output_info_property.size).to eq(2)
     expect(output_info_property[0]).to eq(info_property.key)
     # should match if we decode it
-    expect(JSON.parse CGI.unescape(output_info_property[1])).to eq(info_property_hash)
+    expect(JSON.parse(CGI.unescape(output_info_property[1]))).to eq(info_property_hash)
     # also ensure the undecoded value is different so that it was indeed encocded twice
-    expect(output_info_property[1]).not_to eq(CGI.unescape output_info_property[1])
+    expect(output_info_property[1]).not_to eq(CGI.unescape(output_info_property[1]))
   end
 
-  it 'should use the default parameters for http client' do
+  it 'uses the default parameters for http client' do
     http_adapter = DummyForHTTPAdapter.new
     http_client = http_adapter.send(:create_http_client, uri)
     expect(http_client.read_timeout).to eq(60)
     # The default value has changed from nil to 60 in 2.4
-    #expect(http_client.open_timeout).to eq(60)
+    # expect(http_client.open_timeout).to eq(60)
     expect(http_client.use_ssl?).to be false
     expect(http_client.verify_mode).to be_nil
   end
 
-  it 'should set the global parameters for http client' do
+  it 'sets the global parameters for http client' do
     KillBillClient.url = 'https://example.com'
-    KillBillClient.read_timeout = 123000
-    KillBillClient.connection_timeout = 456000
+    KillBillClient.read_timeout = 123_000
+    KillBillClient.connection_timeout = 456_000
     KillBillClient.disable_ssl_verification = true
 
     http_adapter = DummyForHTTPAdapter.new
@@ -83,11 +84,11 @@ describe KillBillClient::API do
     expect(http_client.verify_mode).to eq(OpenSSL::SSL::VERIFY_NONE)
   end
 
-  it 'should set the correct parameters for http client' do
+  it 'sets the correct parameters for http client' do
     # These don't matter (overridden by options)
     KillBillClient.url = 'https://example.com'
-    KillBillClient.read_timeout = 123000
-    KillBillClient.connection_timeout = 456000
+    KillBillClient.read_timeout = 123_000
+    KillBillClient.connection_timeout = 456_000
     KillBillClient.disable_ssl_verification = false
 
     http_adapter = DummyForHTTPAdapter.new
@@ -99,12 +100,12 @@ describe KillBillClient::API do
   end
 
   # See https://github.com/killbill/killbill-client-ruby/issues/69
-  it 'should construct URIs' do
+  it 'constructs URIs' do
     KillBillClient.url = 'http://example.com:8080'
 
     http_adapter = DummyForHTTPAdapter.new
     uri = http_adapter.send(:build_uri, KillBillClient::Model::Account::KILLBILL_API_ACCOUNTS_PREFIX, options)
-    expect(uri).to eq(URI.parse("#{KillBillClient::API.base_uri.to_s}/1.0/kb/accounts"))
+    expect(uri).to eq(URI.parse("#{described_class.base_uri}/1.0/kb/accounts"))
   end
 
   describe '#build_uri' do
@@ -115,14 +116,14 @@ describe KillBillClient::API do
     end
 
     context 'with basic relative URI' do
-      it 'should combine base URI with relative URI' do
+      it 'combines base URI with relative URI' do
         relative_uri = '/1.0/kb/accounts'
         options = {}
         uri = http_adapter.send(:build_uri, relative_uri, options)
         expect(uri.to_s).to eq('http://example.com:8080/1.0/kb/accounts')
       end
 
-      it 'should handle relative URI without leading slash' do
+      it 'handles relative URI without leading slash' do
         relative_uri = '1.0/kb/accounts'
         options = {}
         uri = http_adapter.send(:build_uri, relative_uri, options)
@@ -131,7 +132,7 @@ describe KillBillClient::API do
     end
 
     context 'with custom base_uri in options' do
-      it 'should use custom base_uri from options' do
+      it 'uses custom base_uri from options' do
         relative_uri = '/1.0/kb/accounts'
         options = { base_uri: 'https://custom.example.com:9090' }
         uri = http_adapter.send(:build_uri, relative_uri, options)
@@ -140,7 +141,7 @@ describe KillBillClient::API do
     end
 
     context 'with absolute URI' do
-      it 'should use absolute URI as-is' do
+      it 'uses absolute URI as-is' do
         relative_uri = 'https://absolute.example.com/api/test'
         options = {}
         uri = http_adapter.send(:build_uri, relative_uri, options)
@@ -149,21 +150,21 @@ describe KillBillClient::API do
     end
 
     context 'with path encoding' do
-      it 'should handle already encoded URIs without double encoding' do
+      it 'handles already encoded URIs without double encoding' do
         relative_uri = '/1.0/kb/accounts/my%20account%20with%20spaces'
         options = {}
         uri = http_adapter.send(:build_uri, relative_uri, options)
         expect(uri.to_s).to eq('http://example.com:8080/1.0/kb/accounts/my%20account%20with%20spaces')
       end
 
-      it 'should not encode safe characters in path' do
+      it 'does not encode safe characters in path' do
         relative_uri = '/1.0/kb/accounts/abc-1234'
         options = {}
         uri = http_adapter.send(:build_uri, relative_uri, options)
         expect(uri.to_s).to eq('http://example.com:8080/1.0/kb/accounts/abc-1234')
       end
 
-      it 'should handle already encoded URI with query string without double encoding' do
+      it 'handles already encoded URI with query string without double encoding' do
         relative_uri = '/1.0/kb/accounts/my%20account?search=test%20value'
         options = {}
         uri = http_adapter.send(:build_uri, relative_uri, options)
@@ -172,7 +173,7 @@ describe KillBillClient::API do
     end
 
     context 'with query parameters in options' do
-      it 'should add simple query parameters' do
+      it 'adds simple query parameters' do
         relative_uri = '/1.0/kb/accounts'
         options = { params: { accountId: '123', limit: 10 } }
         uri = http_adapter.send(:build_uri, relative_uri, options)
@@ -180,15 +181,15 @@ describe KillBillClient::API do
         expect(uri.query).to include('limit=10')
       end
 
-      it 'should handle array parameters' do
+      it 'handles array parameters' do
         relative_uri = '/1.0/kb/accounts'
-        options = { params: { tags: ['premium', 'business'] } }
+        options = { params: { tags: %w[premium business] } }
         uri = http_adapter.send(:build_uri, relative_uri, options)
         expect(uri.query).to include('tags=premium')
         expect(uri.query).to include('tags=business')
       end
 
-      it 'should merge with existing query string in relative URI' do
+      it 'merges with existing query string in relative URI' do
         relative_uri = '/1.0/kb/accounts?existing=value'
         options = { params: { new: 'param' } }
         uri = http_adapter.send(:build_uri, relative_uri, options)
@@ -196,14 +197,14 @@ describe KillBillClient::API do
         expect(uri.query).to include('new=param')
       end
 
-      it 'should handle empty params hash' do
+      it 'handles empty params hash' do
         relative_uri = '/1.0/kb/accounts'
         options = { params: {} }
         uri = http_adapter.send(:build_uri, relative_uri, options)
         expect(uri.query).to be_nil
       end
 
-      it 'should encode special characters in query parameters' do
+      it 'encodes special characters in query parameters' do
         relative_uri = '/1.0/kb/accounts'
         options = { params: { search: 'test & special chars' } }
         uri = http_adapter.send(:build_uri, relative_uri, options)
@@ -212,7 +213,7 @@ describe KillBillClient::API do
     end
 
     context 'with plugin properties' do
-      it 'should handle pluginProperty option' do
+      it 'handles pluginProperty option' do
         contract_property = KillBillClient::Model::PluginPropertyAttributes.new
         contract_property.key = :contractId
         contract_property.value = 'test-123'
@@ -227,11 +228,11 @@ describe KillBillClient::API do
     end
 
     context 'with control plugin names' do
-      it 'should handle controlPluginNames option' do
+      it 'handles controlPluginNames option' do
         relative_uri = '/1.0/kb/accounts'
         options = {
           params: {},
-          controlPluginNames: ['plugin1', 'plugin2']
+          controlPluginNames: %w[plugin1 plugin2]
         }
         uri = http_adapter.send(:build_uri, relative_uri, options)
         expect(uri.query).to include('controlPluginName=plugin1')
@@ -240,21 +241,21 @@ describe KillBillClient::API do
     end
 
     context 'with spaces in path segments' do
-      it 'should encode spaces in relative URI path segments' do
+      it 'encodes spaces in relative URI path segments' do
         relative_uri = '/1.0/kb/accounts/search/Kill Bill Client'
         options = {}
         uri = http_adapter.send(:build_uri, relative_uri, options)
         expect(uri.to_s).to eq('http://example.com:8080/1.0/kb/accounts/search/Kill%20Bill%20Client')
       end
 
-      it 'should handle absolute URI with spaces in path' do
+      it 'handles absolute URI with spaces in path' do
         relative_uri = 'http://127.0.0.1:8080/1.0/kb/accounts/search/Kill Bill Client'
         options = {}
         uri = http_adapter.send(:build_uri, relative_uri, options)
         expect(uri.to_s).to eq('http://127.0.0.1:8080/1.0/kb/accounts/search/Kill%20Bill%20Client')
       end
 
-      it 'should preserve scheme and host when encoding spaces in absolute URI' do
+      it 'preserves scheme and host when encoding spaces in absolute URI' do
         relative_uri = 'https://api.example.com:9090/search/My Test Account'
         options = {}
         uri = http_adapter.send(:build_uri, relative_uri, options)
@@ -266,7 +267,7 @@ describe KillBillClient::API do
     end
 
     context 'with nil values in query parameters' do
-      it 'should skip nil values in params' do
+      it 'skips nil values in params' do
         relative_uri = '/1.0/kb/accounts'
         options = {
           params: {
@@ -281,7 +282,7 @@ describe KillBillClient::API do
         expect(uri.query).to include('limit=10')
       end
 
-      it 'should handle all nil values in params' do
+      it 'handles all nil values in params' do
         relative_uri = '/1.0/kb/accounts'
         options = {
           params: {
@@ -293,7 +294,7 @@ describe KillBillClient::API do
         expect(uri.query).to be_nil
       end
 
-      it 'should handle mixed nil and valid values' do
+      it 'handles mixed nil and valid values' do
         relative_uri = '/1.0/kb/accounts'
         options = {
           params: {
@@ -317,7 +318,7 @@ describe KillBillClient::API do
   describe '#encode_params' do
     let(:http_adapter) { DummyForHTTPAdapter.new }
 
-    it 'should filter out nil values from params' do
+    it 'filters out nil values from params' do
       options = {
         params: {
           account: nil,
@@ -333,7 +334,7 @@ describe KillBillClient::API do
       expect(query_string).not_to include('search=')
     end
 
-    it 'should return nil when all params are nil' do
+    it 'returns nil when all params are nil' do
       options = {
         params: {
           account: nil,
@@ -344,13 +345,13 @@ describe KillBillClient::API do
       expect(query_string).to be_nil
     end
 
-    it 'should return nil when params hash is empty' do
+    it 'returns nil when params hash is empty' do
       options = { params: {} }
       query_string = http_adapter.send(:encode_params, options)
       expect(query_string).to be_nil
     end
 
-    it 'should handle options without params key' do
+    it 'handles options without params key' do
       options = { account: nil, withStackTrace: true }
       query_string = http_adapter.send(:encode_params, options)
       expect(query_string).to be_nil

@@ -1,12 +1,13 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class PaymentMethod < PaymentMethodAttributes
-
       include KillBillClient::Model::CustomFieldHelper
       include KillBillClient::Model::AuditLogWithHistoryHelper
 
-      KILLBILL_API_PAYMENT_METHODS_PREFIX = "#{KILLBILL_API_PREFIX}/paymentMethods"
-      EXTERNAL_PAYMENT = '__EXTERNAL_PAYMENT__'.freeze
+      KILLBILL_API_PAYMENT_METHODS_PREFIX = "#{KILLBILL_API_PREFIX}/paymentMethods".freeze
+      EXTERNAL_PAYMENT = '__EXTERNAL_PAYMENT__'
 
       has_many :audit_logs, KillBillClient::Model::AuditLog
 
@@ -17,10 +18,10 @@ module KillBillClient
         def find_by_id(payment_method_id, included_deleted = false, with_plugin_info = false, plugin_property = [], audit = 'NONE', options = {})
           get "#{KILLBILL_API_PAYMENT_METHODS_PREFIX}/#{payment_method_id}",
               {
-                  :pluginProperty => plugin_property,
-                  :includedDeleted => included_deleted,
-                  :audit => audit,
-                  :withPluginInfo => with_plugin_info
+                pluginProperty: plugin_property,
+                includedDeleted: included_deleted,
+                audit: audit,
+                withPluginInfo: with_plugin_info
               },
               options
         end
@@ -28,7 +29,7 @@ module KillBillClient
         def find_all_by_account_id(account_id, with_plugin_info = false, options = {})
           get "#{Account::KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/paymentMethods",
               {
-                  :withPluginInfo => with_plugin_info
+                withPluginInfo: with_plugin_info
               },
               options
         end
@@ -36,8 +37,8 @@ module KillBillClient
         def find_in_batches(offset = 0, limit = 100, options = {})
           get "#{KILLBILL_API_PAYMENT_METHODS_PREFIX}/#{Resource::KILLBILL_API_PAGINATION_PREFIX}",
               {
-                  :offset => offset,
-                  :limit => limit
+                offset: offset,
+                limit: limit
               },
               options
         end
@@ -45,20 +46,20 @@ module KillBillClient
         def find_in_batches_by_search_key(search_key, offset = 0, limit = 100, options = {})
           get "#{KILLBILL_API_PAYMENT_METHODS_PREFIX}/search/#{search_key}",
               {
-                  :offset => offset,
-                  :limit => limit
+                offset: offset,
+                limit: limit
               },
               options
         end
 
         def find_by_external_key(external_key, included_deleted = false, with_plugin_info = false, plugin_property = [], audit = 'NONE', options = {})
-          get "#{KILLBILL_API_PAYMENT_METHODS_PREFIX}",
+          get KILLBILL_API_PAYMENT_METHODS_PREFIX.to_s,
               {
-                  :externalKey => external_key,
-                  :pluginProperty => plugin_property,
-                  :includedDeleted => included_deleted,
-                  :audit => audit,
-                  :withPluginInfo => with_plugin_info
+                externalKey: external_key,
+                pluginProperty: plugin_property,
+                includedDeleted: included_deleted,
+                audit: audit,
+                withPluginInfo: with_plugin_info
               },
               options
         end
@@ -68,9 +69,9 @@ module KillBillClient
               nil,
               {},
               {
-                  :user => user,
-                  :reason => reason,
-                  :comment => comment,
+                user: user,
+                reason: reason,
+                comment: comment
               }.merge(options)
         end
 
@@ -78,25 +79,25 @@ module KillBillClient
           delete "#{KILLBILL_API_PAYMENT_METHODS_PREFIX}/#{payment_method_id}",
                  {},
                  {
-                     :forceDefaultPmDeletion => force_default_deletion,
-                     :deleteDefaultPmWithAutoPayOff => set_auto_pay_off
+                   forceDefaultPmDeletion: force_default_deletion,
+                   deleteDefaultPmWithAutoPayOff: set_auto_pay_off
                  },
                  {
-                     :user => user,
-                     :reason => reason,
-                     :comment => comment,
+                   user: user,
+                   reason: reason,
+                   comment: comment
                  }.merge(options)
         end
 
         def refresh(account_id, user = nil, reason = nil, comment = nil, options = {})
           put "#{Account::KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/paymentMethods/refresh",
-               nil,
-               {},
-               {
-                   :user => user,
-                   :reason => reason,
-                   :comment => comment,
-               }.merge(options)
+              nil,
+              {},
+              {
+                user: user,
+                reason: reason,
+                comment: comment
+              }.merge(options)
         end
       end
 
@@ -104,16 +105,15 @@ module KillBillClient
         created_pm = self.class.post "#{Account::KILLBILL_API_ACCOUNTS_PREFIX}/#{account_id}/paymentMethods",
                                      to_json,
                                      {
-                                         :isDefault => is_default
+                                       isDefault: is_default
                                      },
                                      {
-                                         :user => user,
-                                         :reason => reason,
-                                         :comment => comment,
+                                       user: user,
+                                       reason: reason,
+                                       comment: comment
                                      }.merge(options)
         created_pm.refresh(options)
       end
-
 
       def plugin_info=(info)
         @plugin_info = PaymentMethodPluginDetailAttributes.new

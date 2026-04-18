@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'killbill_client/models/resource'
 require 'killbill_client/models/resources'
 

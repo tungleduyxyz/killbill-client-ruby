@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class InvoiceItem < InvoiceItemAttributes
-
-      KILLBILL_API_INVOICE_ITEMS_PREFIX = "#{KILLBILL_API_PREFIX}/invoiceItems"
+      KILLBILL_API_INVOICE_ITEMS_PREFIX = "#{KILLBILL_API_PREFIX}/invoiceItems".freeze
 
       include KillBillClient::Model::TagHelper
       include KillBillClient::Model::CustomFieldHelper
@@ -13,7 +14,6 @@ module KillBillClient
       has_many :audit_logs, KillBillClient::Model::AuditLog
 
       has_audit_logs_with_history KILLBILL_API_INVOICE_ITEMS_PREFIX, :invoice_item_id
-
 
       # DO NOT DELETE THIS METHOD
       def tags(included_deleted = false, audit = 'NONE', options = {})
@@ -34,9 +34,9 @@ module KillBillClient
                                       tag_definition_ids,
                                       {},
                                       {
-                                          :user    => user,
-                                          :reason  => reason,
-                                          :comment => comment,
+                                        user: user,
+                                        reason: reason,
+                                        comment: comment
                                       }.merge(options),
                                       Tag
         tags(false, 'NONE', options) unless created_tag.nil?
@@ -45,11 +45,11 @@ module KillBillClient
       def create(auto_commit = false, user = nil, reason = nil, comment = nil, options = {})
         created_invoice_item = self.class.post "#{Invoice::KILLBILL_API_INVOICES_PREFIX}/charges/#{account_id}",
                                                [to_hash].to_json,
-                                               {:autoCommit => auto_commit},
+                                               { autoCommit: auto_commit },
                                                {
-                                                   :user    => user,
-                                                   :reason  => reason,
-                                                   :comment => comment,
+                                                 user: user,
+                                                 reason: reason,
+                                                 comment: comment
                                                }.merge(options)
         created_invoice_item.first.refresh(options, Invoice)
       end
@@ -63,9 +63,9 @@ module KillBillClient
                                                 to_json,
                                                 {},
                                                 {
-                                                    :user    => user,
-                                                    :reason  => reason,
-                                                    :comment => comment,
+                                                  user: user,
+                                                  reason: reason,
+                                                  comment: comment
                                                 }.merge(options)
         adjusted_invoice_item.refresh(options, Invoice)
       end
@@ -77,24 +77,24 @@ module KillBillClient
         self.class.delete "#{Invoice::KILLBILL_API_INVOICES_PREFIX}/#{invoice_id}/#{invoice_item_id}/cba",
                           to_json,
                           {
-                              :accountId => account_id
+                            accountId: account_id
                           },
                           {
-                              :user    => user,
-                              :reason  => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
       end
 
       def create_tax_item(auto_commit = false, user = nil, reason = nil, comment = nil, options = {})
         created_tax_item = self.class.post "#{Invoice::KILLBILL_API_INVOICES_PREFIX}/taxes/#{account_id}",
-                                               [to_hash].to_json,
-                                               {:autoCommit => auto_commit},
-                                               {
-                                                   :user    => user,
-                                                   :reason  => reason,
-                                                   :comment => comment,
-                                               }.merge(options)
+                                           [to_hash].to_json,
+                                           { autoCommit: auto_commit },
+                                           {
+                                             user: user,
+                                             reason: reason,
+                                             comment: comment
+                                           }.merge(options)
         created_tax_item.first.refresh(options, Invoice)
       end
     end

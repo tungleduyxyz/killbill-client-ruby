@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class HostedPaymentPage < HostedPaymentPageFieldsAttributes
-
-      KILLBILL_API_HPP_PREFIX = "#{KILLBILL_API_PREFIX}/paymentGateways"
+      KILLBILL_API_HPP_PREFIX = "#{KILLBILL_API_PREFIX}/paymentGateways".freeze
 
       def build_form_descriptor(kb_account_id, payment_method_id = nil, user = nil, reason = nil, comment = nil, options = {})
         query_map = {}
@@ -13,9 +14,9 @@ module KillBillClient
                         to_json,
                         query_map,
                         {
-                            :user => user,
-                            :reason => reason,
-                            :comment => comment,
+                          user: user,
+                          reason: reason,
+                          comment: comment
                         }.merge(options),
                         HostedPaymentPageFormDescriptorAttributes
       end

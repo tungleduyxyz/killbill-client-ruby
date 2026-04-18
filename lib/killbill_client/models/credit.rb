@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class Credit < InvoiceItemAttributes
-      KILLBILL_API_CREDITS_PREFIX = "#{KILLBILL_API_PREFIX}/credits"
+      KILLBILL_API_CREDITS_PREFIX = "#{KILLBILL_API_PREFIX}/credits".freeze
       has_many :audit_logs, KillBillClient::Model::AuditLog
 
       class << self
@@ -14,19 +16,17 @@ module KillBillClient
       end
 
       def create(auto_commit = false, user = nil, reason = nil, comment = nil, options = {})
-        created_credits = self.class.post KILLBILL_API_CREDITS_PREFIX,
-                                         [to_hash].to_json,
-                                         {
-                                             :autoCommit => auto_commit
-                                         },
-                                         {
-                                             :user => user,
-                                             :reason => reason,
-                                             :comment => comment,
-                                         }.merge(options)
-        created_credits
+        self.class.post KILLBILL_API_CREDITS_PREFIX,
+                        [to_hash].to_json,
+                        {
+                          autoCommit: auto_commit
+                        },
+                        {
+                          user: user,
+                          reason: reason,
+                          comment: comment
+                        }.merge(options)
       end
-
     end
   end
 end

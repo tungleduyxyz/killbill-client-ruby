@@ -1,12 +1,13 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class Subscription < SubscriptionAttributes
-
       include KillBillClient::Model::TagHelper
       include KillBillClient::Model::CustomFieldHelper
       include KillBillClient::Model::AuditLogWithHistoryHelper
 
-      KILLBILL_API_ENTITLEMENT_PREFIX = "#{KILLBILL_API_PREFIX}/subscriptions"
+      KILLBILL_API_ENTITLEMENT_PREFIX = "#{KILLBILL_API_PREFIX}/subscriptions".freeze
 
       has_many :events, KillBillClient::Model::EventSubscription
       has_many :price_overrides, KillBillClient::Model::PhasePriceAttributes
@@ -18,23 +19,22 @@ module KillBillClient
       has_audit_logs_with_history KILLBILL_API_ENTITLEMENT_PREFIX, :subscription_id
 
       class << self
-        def find_by_id(subscription_id, audit = "NONE", options = {})
+        def find_by_id(subscription_id, audit = 'NONE', options = {})
           get "#{KILLBILL_API_ENTITLEMENT_PREFIX}/#{subscription_id}",
               {
-                :audit     => audit
+                audit: audit
               },
               options
         end
 
-        def find_by_external_key(external_key, audit = "NONE", options = {})
-          get "#{KILLBILL_API_ENTITLEMENT_PREFIX}",
+        def find_by_external_key(external_key, audit = 'NONE', options = {})
+          get KILLBILL_API_ENTITLEMENT_PREFIX.to_s,
               {
-                :externalKey     => external_key,
-                :audit     => audit
+                externalKey: external_key,
+                audit: audit
               },
               options
         end
-
 
         def event_audit_logs_with_history(event_id, options = {})
           get "#{KILLBILL_API_ENTITLEMENT_PREFIX}/events/#{event_id}/auditLogsWithHistory",
@@ -42,7 +42,6 @@ module KillBillClient
               options,
               AuditLog
         end
-
       end
       #
       # Create a new entitlement
@@ -50,20 +49,18 @@ module KillBillClient
       #
       #
       def create(user = nil, reason = nil, comment = nil, requested_date = nil, call_completion = false, options = {})
-
         params                  = {}
         params[:callCompletion] = call_completion
-        params[:entitlementDate]  = requested_date unless requested_date.nil?
-        params[:billingDate]  = requested_date unless requested_date.nil?
-
+        params[:entitlementDate] = requested_date unless requested_date.nil?
+        params[:billingDate] = requested_date unless requested_date.nil?
 
         created_entitlement = self.class.post KILLBILL_API_ENTITLEMENT_PREFIX,
                                               to_json,
                                               params,
                                               {
-                                                  :user    => user,
-                                                  :reason  => reason,
-                                                  :comment => comment,
+                                                user: user,
+                                                reason: reason,
+                                                comment: comment
                                               }.merge(options)
         created_entitlement.refresh(options)
       end
@@ -78,7 +75,6 @@ module KillBillClient
       #
       def change_plan(input, user = nil, reason = nil, comment = nil,
                       requested_date = nil, billing_policy = nil, target_phase_type = nil, call_completion = false, options = {})
-
         params                  = {}
         params[:callCompletion] = call_completion
         params[:requestedDate]  = requested_date unless requested_date.nil?
@@ -93,11 +89,11 @@ module KillBillClient
                        input.to_json,
                        params,
                        {
-                           :user    => user,
-                           :reason  => reason,
-                           :comment => comment,
+                         user: user,
+                         reason: reason,
+                         comment: comment
                        }.merge(options)
-        self.class.find_by_id(@subscription_id, "NONE", options)
+        self.class.find_by_id(@subscription_id, 'NONE', options)
       end
 
       #
@@ -117,9 +113,9 @@ module KillBillClient
                           {},
                           params,
                           {
-                              :user    => user,
-                              :reason  => reason,
-                              :comment => comment,
+                            user: user,
+                            reason: reason,
+                            comment: comment
                           }.merge(options)
       end
 
@@ -132,9 +128,9 @@ module KillBillClient
                        nil,
                        params,
                        {
-                           :user    => user,
-                           :reason  => reason,
-                           :comment => comment,
+                         user: user,
+                         reason: reason,
+                         comment: comment
                        }.merge(options)
       end
 
@@ -142,46 +138,43 @@ module KillBillClient
       # Update Subscription BCD
       #
       def update_bcd(user = nil, reason = nil, comment = nil, effective_from_date = nil, force_past_effective_date = nil, options = {})
-
-        params                  = {}
+        params = {}
         params[:effectiveFromDate] = effective_from_date unless effective_from_date.nil?
         params[:forceNewBcdWithPastEffectiveDate] = force_past_effective_date unless force_past_effective_date.nil?
 
-        return self.class.put "#{KILLBILL_API_ENTITLEMENT_PREFIX}/#{subscription_id}/bcd",
-                              self.to_json,
-                              params,
-                              {
-                                  :user    => user,
-                                  :reason  => reason,
-                                  :comment => comment,
-                              }.merge(options)
+        self.class.put "#{KILLBILL_API_ENTITLEMENT_PREFIX}/#{subscription_id}/bcd",
+                       to_json,
+                       params,
+                       {
+                         user: user,
+                         reason: reason,
+                         comment: comment
+                       }.merge(options)
       end
-
 
       #
       # Block a Subscription
       #
       def set_blocking_state(state_name, service, is_block_change, is_block_entitlement, is_block_billing, requested_date = nil, user = nil, reason = nil, comment = nil, options = {})
-
         body = KillBillClient::Model::BlockingStateAttributes.new
         body.state_name = state_name
         body.service = service
         body.is_block_change = is_block_change
         body.is_block_entitlement = is_block_entitlement
         body.is_block_billing = is_block_billing
-        body.type = "SUBSCRIPTION"
+        body.type = 'SUBSCRIPTION'
 
         params = {}
         params[:requestedDate] = requested_date unless requested_date.nil?
 
         self.class.post "#{KILLBILL_API_ENTITLEMENT_PREFIX}/#{subscription_id}/block",
-                       body.to_json,
-                       params,
-                       {
-                           :user    => user,
-                           :reason  => reason,
-                           :comment => comment,
-                       }.merge(options)
+                        body.to_json,
+                        params,
+                        {
+                          user: user,
+                          reason: reason,
+                          comment: comment
+                        }.merge(options)
       end
 
       #
@@ -200,9 +193,9 @@ module KillBillClient
                         entitlements.to_json,
                         params,
                         {
-                            :user    => user,
-                            :reason  => reason,
-                            :comment => comment,
+                          user: user,
+                          reason: reason,
+                          comment: comment
                         }.merge(options)
       end
 
@@ -210,14 +203,13 @@ module KillBillClient
       # Undo a pending change plan on an entitlement
       #
       def undo_change_plan(user = nil, reason = nil, comment = nil, options = {})
-
         self.class.put "#{KILLBILL_API_ENTITLEMENT_PREFIX}/#{subscription_id}/undoChangePlan",
                        {},
                        {},
                        {
-                           :user    => user,
-                           :reason  => reason,
-                           :comment => comment,
+                         user: user,
+                         reason: reason,
+                         comment: comment
                        }.merge(options)
       end
 
@@ -225,18 +217,18 @@ module KillBillClient
       # Update Subscription Quantity
       #
       def update_quantity(user = nil, reason = nil, comment = nil, effective_from_date = nil, force_new_quantity_with_past_effective_date = nil, options = {})
-        params                  = {}
+        params = {}
         params[:effectiveFromDate] = effective_from_date unless effective_from_date.nil?
         params[:forceNewQuantityWithPastEffectiveDate] = force_new_quantity_with_past_effective_date unless force_new_quantity_with_past_effective_date.nil?
 
-        return self.class.put "#{KILLBILL_API_ENTITLEMENT_PREFIX}/#{subscription_id}/quantity",
-                              self.to_json,
-                              params,
-                              {
-                                  :user    => user,
-                                  :reason  => reason,
-                                  :comment => comment,
-                              }.merge(options)
+        self.class.put "#{KILLBILL_API_ENTITLEMENT_PREFIX}/#{subscription_id}/quantity",
+                       to_json,
+                       params,
+                       {
+                         user: user,
+                         reason: reason,
+                         comment: comment
+                       }.merge(options)
       end
     end
   end

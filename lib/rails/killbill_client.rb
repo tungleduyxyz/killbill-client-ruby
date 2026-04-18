@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module KillBillClient
   class Railtie < Rails::Railtie
     initializer :killbill_client_set_logger do

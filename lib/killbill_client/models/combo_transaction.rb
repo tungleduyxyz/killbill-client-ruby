@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 module KillBillClient
   module Model
     class ComboTransaction < ComboPaymentTransactionAttributes
-
       def auth(user = nil, reason = nil, comment = nil, options = {}, refresh_options = nil)
         @transaction.transaction_type = 'AUTHORIZE'
 
@@ -24,29 +25,25 @@ module KillBillClient
 
       def combo_payment(user, reason, comment, options, refresh_options = nil)
         follow_location = true
-        follow_location = options.delete(:follow_location) if options.has_key?(:follow_location)
+        follow_location = options.delete(:follow_location) if options.key?(:follow_location)
         begin
           created_transaction = self.class.post "#{Payment::KILLBILL_API_PAYMENTS_PREFIX}/combo",
                                                 to_json,
                                                 {},
                                                 {
-                                                    :user => user,
-                                                    :reason => reason,
-                                                    :comment => comment,
+                                                  user: user,
+                                                  reason: reason,
+                                                  comment: comment
                                                 }.merge(options)
-        rescue KillBillClient::API::ResponseError => error
-          response = error.response
-          if follow_location && response.header['location']
-            created_transaction = ComboTransaction.new
-            created_transaction.uri = response.header['location']
-          else
-            raise error
-          end
+        rescue KillBillClient::API::ResponseError => e
+          response = e.response
+          raise e unless follow_location && response.header['location']
+
+          created_transaction = ComboTransaction.new
+          created_transaction.uri = response.header['location']
         end
 
-        if follow_location
-          return created_transaction.refresh(refresh_options || options, Payment)
-        end
+        return created_transaction.refresh(refresh_options || options, Payment) if follow_location
 
         created_payment = Payment.new
         created_payment.uri = created_transaction.uri

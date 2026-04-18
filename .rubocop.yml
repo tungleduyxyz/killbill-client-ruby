@@ -1,0 +1,147 @@
+require:
+  - rubocop-performance
+  - rubocop-rspec
+  - rubocop-thread_safety
+
+inherit_mode:
+  merge:
+    - Exclude
+
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.2
+
+Gemspec/RequiredRubyVersion:
+  Enabled: false
+
+Layout/LineLength:
+  Enabled: false
+
+# Alternative?
+Gemspec/RubyVersionGlobalsUsage:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/BlockNesting:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/ParameterLists:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/EmptyElse:
+  EnforcedStyle: empty
+
+# Changing boolean positional args to keyword args is a public API breaking change
+Style/OptionalBooleanParameter:
+  Enabled: false
+
+# Format strings in the client lib use unannotated tokens intentionally
+Style/FormatStringToken:
+  Enabled: false
+
+Style/FormatString:
+  Enabled: false
+
+# Duplicate branches may be intentional for clarity
+Lint/DuplicateBranch:
+  Enabled: false
+
+# Backward-compatibility shim - changing would alter runtime behavior
+Lint/UriEscapeUnescape:
+  Enabled: false
+
+# Intentional design - parent Error class doesn't require message initialization
+Lint/MissingSuper:
+  Enabled: false
+
+# API-breaking: renaming has_many/has_one/has_tags would break all callers
+Naming/PredicatePrefix:
+  Enabled: false
+
+# API-breaking: set_* writers are part of the public API
+Naming/AccessorMethodName:
+  Enabled: false
+
+# API-breaking: module name change would break all consumers
+Naming/ClassAndModuleCamelCase:
+  Enabled: false
+
+# CamelCase variable names are used for XML/JSON field mapping
+Naming/VariableName:
+  Enabled: false
+
+# Short param names (e.g., `kb`) are domain-standard abbreviations
+Naming/MethodParameterName:
+  Enabled: false
+
+# Dev dependencies declared in gemspec intentionally (JRuby compatibility)
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+# API-breaking: reordering optional boolean args would break all callers
+Style/OptionalArguments:
+  Enabled: false
+
+# Intentional class-level state in API client models
+Style/ClassVars:
+  Enabled: false
+
+ThreadSafety/ClassInstanceVariable:
+  Enabled: false
+
+# Test assertions need investigation before changing
+RSpec/IdenticalEqualityAssertion:
+  Enabled: false
+
+# Cannot easily verify doubles without knowing exact Net::HTTP request/response classes
+RSpec/VerifiedDoubles:
+  Enabled: false
+
+# RSpec cops
+RSpec:
+  Enabled: true
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+# Spec file paths don't follow default RSpec convention in this project
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+# Performance cops
+Performance:
+  Enabled: true
+
+# Thread Safety cops
+ThreadSafety:
+  Enabled: true
+
+ThreadSafety/ClassAndModuleAttributes:
+  Enabled: false
